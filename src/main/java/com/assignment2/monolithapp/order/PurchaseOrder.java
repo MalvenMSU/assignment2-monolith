@@ -1,6 +1,9 @@
 package com.assignment2.monolithapp.order;
 
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -14,14 +17,17 @@ public class PurchaseOrder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
+    @NotNull
     private Long customerId;
     
     private LocalDateTime orderDate;
     private BigDecimal totalAmount;
     private String status;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "order_items", joinColumns = @JoinColumn(name = "order_id"))
+    @Valid
+    @NotEmpty
     private List<OrderItem> items = new ArrayList<>();
 
     public PurchaseOrder() {
