@@ -1,0 +1,25 @@
+Running with gitlab-runner 17.0.0
+Preparing the "docker" executor
+Using Docker executor with image gradle:8.14.4-jdk21 ...
+Fetching changes with git depth set to 20...
+Executing "step_script" stage of the job script
+$ ./gradlew test
+> Task :compileJava UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :testClasses UP-TO-DATE
+> Task :test
+
+OrderControllerTest > shouldGetOrders() FAILED
+    java.lang.AssertionError: Status expected:<200> but was:<500>
+        at com.assignment2.monolithapp.order.OrderControllerTest.shouldGetOrders(OrderControllerTest.java:80)
+
+Resolved Exception:
+    Type = org.springframework.http.converter.HttpMessageNotWritableException
+    Could not write JSON: failed to lazily initialize a collection of role:
+    com.assignment2.monolithapp.order.PurchaseOrder.items: could not initialize proxy - no Session
+
+8 tests completed, 1 failed
+> Task :test FAILED
+BUILD FAILED in 5s
