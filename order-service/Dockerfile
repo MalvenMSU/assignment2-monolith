@@ -4,6 +4,8 @@ WORKDIR /workspace
 COPY gradlew gradlew
 COPY gradle gradle
 COPY settings.gradle build.gradle ./
+COPY customer-service customer-service
+COPY product-service product-service
 COPY order-service order-service
 
 RUN chmod +x gradlew && ./gradlew :order-service:bootJar --no-daemon
