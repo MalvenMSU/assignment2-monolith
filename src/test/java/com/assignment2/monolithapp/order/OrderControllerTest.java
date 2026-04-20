@@ -1,6 +1,10 @@
 package com.assignment2.monolithapp.order;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.assignment2.monolithapp.customer.Customer;
+import com.assignment2.monolithapp.customer.CustomerRepository;
+import com.assignment2.monolithapp.product.Product;
+import com.assignment2.monolithapp.product.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +29,12 @@ public class OrderControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
+    private CustomerRepository customerRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
     private OrderRepository orderRepository;
 
     @Autowired
@@ -32,35 +42,59 @@ public class OrderControllerTest {
 
     @BeforeEach
     void setUp() {
+        productRepository.deleteAll();
+        customerRepository.deleteAll();
         orderRepository.deleteAll();
     }
 
     @Test
     void shouldCreateOrder() throws Exception {
+        Customer customer = customerRepository.save(new Customer("John", "Doe", "john.doe@example.com"));
+        Product product = productRepository.save(new Product("Laptop", "Gaming laptop", new BigDecimal("1500.00"), 10));
+
         PurchaseOrder order = new PurchaseOrder();
-        order.setCustomerId(1L);
-        order.setTotalAmount(new BigDecimal("1500.00"));
-        order.setItems(List.of(new OrderItem(100L, 1, new BigDecimal("1500.00"))));
+        order.setCustomerId(customer.getId());
+        order.setItems(List.of(new OrderItem(product.getId(), 1, null)));
 
         mockMvc.perform(post("/api/orders")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(order)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.customerId").value(1))
-                .andExpect(jsonPath("$.items[0].productId").value(100));
+                .andExpect(jsonPath("$.customerId").value(customer.getId()))
+                .andExpect(jsonPath("$.totalAmount").value(1500.00))
+                .andExpect(jsonPath("$.items[0].productId").value(product.getId()));
     }
 
     @Test
     void shouldGetOrders() throws Exception {
+        Customer customer = customerRepository.save(new Customer("Jane", "Doe", "jane.doe@example.com"));
+        Product product = productRepository.save(new Product("Keyboard", "Mechanical keyboard", new BigDecimal("50.00"), 5));
         PurchaseOrder order = new PurchaseOrder();
-        order.setCustomerId(2L);
+        order.setCustomerId(customer.getId());
         order.setTotalAmount(new BigDecimal("50.00"));
+        order.setItems(List.of(new OrderItem(product.getId(), 1, new BigDecimal("50.00"))));
         orderRepository.save(order);
 
         mockMvc.perform(get("/api/orders"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$[0].customerId").value(2));
+                .andExpect(jsonPath("$[0].customerId").value(customer.getId()));
+    }
+
+    @Test
+    void shouldRejectOrderWhenProductStockIsInsufficient() throws Exception {
+        Customer customer = customerRepository.save(new Customer("John", "Doe", "john.doe@example.com"));
+        Product product = productRepository.save(new Product("Mouse", "Wireless mouse", new BigDecimal("50.00"), 1));
+
+        PurchaseOrder order = new PurchaseOrder();
+        order.setCustomerId(customer.getId());
+        order.setItems(List.of(new OrderItem(product.getId(), 2, null)));
+
+        mockMvc.perform(post("/api/orders")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(order)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").exists());
     }
 }

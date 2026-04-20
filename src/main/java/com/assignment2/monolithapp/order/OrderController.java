@@ -2,6 +2,7 @@ package com.assignment2.monolithapp.order;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -9,26 +10,26 @@ import java.util.List;
 @RequestMapping("/api/orders")
 public class OrderController {
 
-    private final OrderRepository orderRepository;
+    private final OrderService orderService;
 
-    public OrderController(OrderRepository orderRepository) {
-        this.orderRepository = orderRepository;
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
     }
 
     @GetMapping
     public List<PurchaseOrder> getAllOrders() {
-        return orderRepository.findAll();
+        return orderService.getAllOrders();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<PurchaseOrder> getOrderById(@PathVariable Long id) {
-        return orderRepository.findById(id)
+        return orderService.getOrderById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public PurchaseOrder createOrder(@RequestBody PurchaseOrder order) {
-        return orderRepository.save(order);
+    public PurchaseOrder createOrder(@Valid @RequestBody PurchaseOrder order) {
+        return orderService.createOrder(order);
     }
 }
