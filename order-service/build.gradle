@@ -1,0 +1,36 @@
+plugins {
+    id 'org.springframework.boot'
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+    runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'org.postgresql:postgresql'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java']
+            include 'com/assignment2/monolithapp/order/**'
+            include 'com/assignment2/monolithapp/shared/**'
+        }
+        resources {
+            srcDirs = ['src/main/resources']
+        }
+    }
+    test {
+        java {
+            srcDirs = ['src/test/java']
+            include 'com/assignment2/monolithapp/order/**'
+        }
+    }
+}
+
+tasks.named('bootJar') {
+    archiveFileName = 'order-service.jar'
+}
