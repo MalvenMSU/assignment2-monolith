@@ -1,1 +1,5 @@
 rootProject.name = 'monolithapp'
+
+include 'customer-service'
+include 'product-service'
+include 'order-service'
